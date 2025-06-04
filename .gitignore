@@ -1,0 +1,10 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# Dependencies
+node_modules/
+
+# Package Manager Configuration
+package-lock.json
+
+# Generated Files
+frontend/build/
