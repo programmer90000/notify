@@ -41,7 +41,7 @@ function NotificationSetter() {
                 return response.json();
             })
             .then((data) => {
-                console.log(data);
+                console.log(`Notification saved successfully: ${data}`);
                 fetch("http://localhost:3001/notifications/all")
                     .then((response) => { return response.json(); })
                     .then((data) => { return console.log(data); })

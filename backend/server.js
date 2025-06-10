@@ -1,6 +1,10 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const db = require("./database");
+
+app.use(cors());
+app.use(express.json());
 
 app.post("/notifications", (req, res) => {
     const { title, description, date, time, repeatability } = req.body;
