@@ -9,6 +9,14 @@ const NotificationList = ({ onNavigateBack }) => {
             .then((data) => { return setNotifications(data); });
     }, []);
 
+    const handleDelete = (id) => {
+        console.log("Delete notification with id:", id);
+    };
+
+    const handleEdit = (id) => {
+        console.log("Edit notification with id:", id);
+    };
+
     return (
         <div className = "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 font-sans">
             <div className = "max-w-4xl mx-auto">
@@ -35,6 +43,10 @@ const NotificationList = ({ onNavigateBack }) => {
                                                     <p className = "text-gray-600 whitespace-normal break-words">{notification.description}</p>
                                                 </div>
                                             )}
+                                        </div>
+                                        <div className = "ml-4 flex flex-col space-y-2">
+                                            <button onClick = {() => { return handleEdit(notification.id); }} className = "px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 text-sm">Edit</button>
+                                            <button onClick = {() => { return handleDelete(notification.id); }} className = "px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200 text-sm" >Delete</button>
                                         </div>
                                     </div>
                                     <div className = "mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm text-gray-500">
