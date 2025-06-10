@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+const { ipcRenderer } = window.require("electron");
 
 const NotificationList = ({ onNavigateBack }) => {
     const [notifications, setNotifications] = useState([]);
@@ -34,6 +35,7 @@ const NotificationList = ({ onNavigateBack }) => {
         })
             .then((res) => { return res.json(); })
             .then(() => {
+                ipcRenderer.send("schedule-notification", editTarget);
                 setEditTarget(null);
                 loadNotifications();
             })
