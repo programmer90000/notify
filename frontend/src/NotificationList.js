@@ -24,19 +24,17 @@ const NotificationList = ({ onNavigateBack }) => {
                         <div className = "space-y-6">
                             {notifications.map((notification) => { return (
                                 <div key = {notification.id} className = "p-6 border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
-                                    <div className = "flex justify-between items-start">
-                                        <div className = "w-full">
-                                            <h2 className = "text-xl font-bold text-gray-800 mb-2">{notification.title}</h2>
+                                    <div className = "flex justify-between">
+                                        <div className = "flex-1 min-w-0">
+                                            <div className = "flex justify-between items-start">
+                                                <h2 className = "text-xl font-bold text-gray-800 mb-2">{notification.title}</h2>
+                                                <span className = "ml-4 inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 whitespace-nowrap">{notification.repeatability.charAt(0).toUpperCase() + notification.repeatability.slice(1)}</span>
+                                            </div>
                                             {notification.description && (
-                                                <div className = "max-h-32 overflow-y-auto pr-2">
+                                                <div className = "max-h-32 overflow-y-auto pr-2 mt-2">
                                                     <p className = "text-gray-600 whitespace-normal break-words">{notification.description}</p>
                                                 </div>
                                             )}
-                                        </div>
-                                        <div className = "ml-4 flex-shrink-0">
-                                            <span className = "inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                                {notification.repeatability.charAt(0).toUpperCase() + notification.repeatability.slice(1)}
-                                            </span>
                                         </div>
                                     </div>
                                     <div className = "mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm text-gray-500">
