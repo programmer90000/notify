@@ -1,16 +1,31 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
+import NotificationList from "./NotificationList";
 import "./styles.css";
 
 const App = () => {
+    const [currentScreen, setCurrentScreen] = useState("setter");
+
+    const navigateToList = () => {
+        setCurrentScreen("list");
+    };
+
+    const navigateToSetter = () => {
+        setCurrentScreen("setter");
+    };
+
+    if (currentScreen === "list") {
+        return <NotificationList onNavigateBack = {navigateToSetter} />;
+    }
+
     return (
         <div className = "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 font-sans">
-            <NotificationSetter />
+            <NotificationSetter onNavigateToList = {navigateToList} />
         </div>
     );
 };
 
-function NotificationSetter() {
+function NotificationSetter({ onNavigateToList }) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [date, setDate] = useState("");
@@ -58,7 +73,10 @@ function NotificationSetter() {
 
     return (
         <div className = "w-full max-w-md bg-white p-8 rounded-xl shadow-2xl space-y-6 border border-gray-200">
-            <h2 className = "text-3xl font-extrabold text-gray-900 text-center mb-6">Set Your Notification</h2>
+            <div className = "flex justify-between items-center mb-6">
+                <h2 className = "text-3xl font-extrabold text-gray-900">Set Your Notification</h2>
+                <button onClick = {onNavigateToList} className = "px-4 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 text-sm">View All</button>
+            </div>
 
             <form onSubmit = {handleSubmit} className = "space-y-5">
                 <div>
