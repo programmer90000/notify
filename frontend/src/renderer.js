@@ -26,13 +26,29 @@ function NotificationSetter() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-
+      
         const notificationData = { title, description, date, time, repeatability };
-
-        console.log("Notification Data:", notificationData);
-
-        alert("Notification settings saved! Check the console for details.");
-
+      
+        fetch("http://localhost:3001/notifications", {
+            "method": "POST",
+            "headers": { "Content-Type": "application/json" },
+            "body": JSON.stringify(notificationData),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+                fetch("http://localhost:3001/notifications/all")
+                    .then((response) => { return response.json(); })
+                    .then((data) => { return console.log(data); })
+                    .catch((error) => { return console.error(error); });
+            })
+            .catch((error) => { return console.error(error); });
+      
         setTitle("");
         setDescription("");
         setDate("");
