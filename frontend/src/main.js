@@ -1,6 +1,27 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 
 let mainWindow;
+let scheduledNotifications = [];
+
+function scheduleNotification({ title, body, timestamp }) {
+    const delay = timestamp - Date.now();
+    if (delay <= 0) {
+        new Notification({ title, body }).show();
+        return;
+    }
+  
+    setTimeout(() => {
+        new Notification({ title, body }).show();
+    }, delay);
+}
+  
+ipcMain.on("schedule-notification", (event, notification) => {
+    const timestamp = new Date(`${notification.date}T${notification.time}`).getTime();
+    
+    scheduleNotification({ "title": notification.title, "body": notification.description || "", timestamp });
+    scheduledNotifications.push(notification);
+
+});
 
 function createWindow() {
     mainWindow = new BrowserWindow({

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+const { ipcRenderer } = window.require("electron");
 import NotificationList from "./NotificationList";
 import "./styles.css";
 
@@ -42,6 +43,7 @@ function NotificationSetter({ onNavigateToList }) {
         event.preventDefault();
       
         const notificationData = { title, description, date, time, repeatability };
+        ipcRenderer.send("schedule-notification", notificationData);
       
         fetch("http://localhost:3001/notifications", {
             "method": "POST",
