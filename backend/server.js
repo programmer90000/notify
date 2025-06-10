@@ -35,3 +35,33 @@ app.get("/notifications/all", (req, res) => {
         }
     });
 });
+
+app.delete("/notifications/:id", (req, res) => {
+    const { id } = req.params;
+    db.run("DELETE FROM notifications WHERE id = ?", [id], function (err) {
+        if (err) {
+            console.error(err);
+            res.status(500).send({ "message": "Failed to delete notification" });
+        } else {
+            res.send({ "message": "Notification deleted" });
+        }
+    });
+});
+
+app.put("/notifications/:id", (req, res) => {
+    const { id } = req.params;
+    const { title, description, date, time, repeatability } = req.body;
+
+    db.run(`
+        UPDATE notifications
+        SET title = ?, description = ?, date = ?, time = ?, repeatability = ?
+        WHERE id = ?
+    `, [title, description, date, time, repeatability, id], function (err) {
+        if (err) {
+            console.error(err);
+            res.status(500).send({ "message": "Failed to update notification" });
+        } else {
+            res.send({ "message": "Notification updated" });
+        }
+    });
+});
