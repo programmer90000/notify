@@ -15,12 +15,7 @@ const NotificationList = ({ onNavigateBack }) => {
                 <div className = "bg-white p-8 rounded-xl shadow-2xl border border-gray-200">
                     <div className = "flex justify-between items-center mb-8">
                         <h1 className = "text-3xl font-extrabold text-gray-900">Your Notifications</h1>
-                        <button 
-                            onClick = {onNavigateBack}
-                            className = "px-4 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 text-sm"
-                        >
-                            Back to Setter
-                        </button>
+                        <button onClick = {onNavigateBack} className = "px-4 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 text-sm">Back to Setter</button>
                     </div>
 
                     {notifications.length === 0 ? (
@@ -28,24 +23,22 @@ const NotificationList = ({ onNavigateBack }) => {
                     ) : (
                         <div className = "space-y-6">
                             {notifications.map((notification) => { return (
-                                <div 
-                                    key = {notification.id} 
-                                    className = "p-6 border border-gray-200 rounded-lg hover:shadow-md transition duration-200"
-                                >
+                                <div key = {notification.id} className = "p-6 border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
                                     <div className = "flex justify-between items-start">
-                                        <div>
-                                            <h2 className = "text-xl font-bold text-gray-800">{notification.title}</h2>
+                                        <div className = "w-full">
+                                            <h2 className = "text-xl font-bold text-gray-800 mb-2">{notification.title}</h2>
                                             {notification.description && (
-                                                <p className = "text-gray-600 mt-2">{notification.description}</p>
+                                                <div className = "max-h-32 overflow-y-auto pr-2">
+                                                    <p className = "text-gray-600 whitespace-normal break-words">{notification.description}</p>
+                                                </div>
                                             )}
                                         </div>
-                                        <div className = "text-right">
+                                        <div className = "ml-4 flex-shrink-0">
                                             <span className = "inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
                                                 {notification.repeatability.charAt(0).toUpperCase() + notification.repeatability.slice(1)}
                                             </span>
                                         </div>
                                     </div>
-                                    
                                     <div className = "mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm text-gray-500">
                                         <span>Date: {notification.date}</span>
                                         <span>Time: {notification.time}</span>
