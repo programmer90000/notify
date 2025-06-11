@@ -3,18 +3,97 @@ const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 let mainWindow;
 let scheduledNotifications = [];
 
-function scheduleNotification({ title, body, timestamp }) {
+function getNextNotificationDate(currentDate, repeatability) {
+    let nextDate;
+    switch (repeatability) {
+    case "daily":
+        nextDate = new Date(currentDate.getTime() + 86400000); // +1 day
+        break;
+    case "weekly":
+        nextDate = new Date(currentDate.getTime() + 604800000); // +7 days
+        break;
+    case "monthly":
+        nextDate = new Date(currentDate);
+        let nextMonth = nextDate.getMonth() + 1;
+        let nextYear = nextDate.getFullYear();
+        if (nextMonth === 12) {
+            nextMonth = 0;
+            nextYear++;
+        }
+
+        nextDate = new Date(nextYear, nextMonth, currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes());
+
+        if (nextDate.getDate() !== currentDate.getDate()) {
+            nextDate.setDate(0);
+        }
+        break;
+    default:
+        nextDate = null;
+    }
+    return nextDate;
+}
+
+function scheduleNotification({ title, body, timestamp, repeatability, originalNotification }) {
     const delay = timestamp - Date.now();
-    if (delay <= 0) {
+
+    function showNotificationAndScheduleNext() {
+
         new Notification({ title, body }).show();
+
+        if (!repeatability) { return; }
+
+        const currentDate = new Date(timestamp);
+        const nextDate = getNextNotificationDate(currentDate, repeatability);
+
+        if (!nextDate) { return; }
+
+        const nextNotificationDate = nextDate.toISOString().split("T")[0];
+        const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+
+        const newNotification = {
+            title,
+            "description": body,
+            "date": nextNotificationDate,
+            "time": nextNotificationTime,
+            repeatability,
+            "completed": 0,
+        };
+
+        fetch("http://localhost:3001/notifications", {
+            "method": "POST",
+            "headers": { "Content-Type": "application/json" },
+            "body": JSON.stringify(newNotification),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(`Notification saved successfully: ${JSON.stringify(data)}`);
+                const nextTimestamp = new Date(`${newNotification.date}T${newNotification.time}`).getTime();
+                scheduleNotification({
+                    "title": newNotification.title,
+                    "body": newNotification.description || "",
+                    "timestamp": nextTimestamp,
+                    "repeatability": newNotification.repeatability,
+                    "originalNotification": newNotification,
+                });
+            })
+            .catch((error) => {
+                console.error("Failed to save notification:", error);
+            });
+    }
+
+    if (delay <= 0) {
+        showNotificationAndScheduleNext();
         return;
     }
-  
-    setTimeout(() => {
-        new Notification({ title, body }).show();
-    }, delay);
+
+    setTimeout(showNotificationAndScheduleNext, delay);
 }
-  
+
 ipcMain.on("schedule-notification", (event, notification) => {
     console.log(`
 Notification Record:
@@ -25,137 +104,16 @@ Time: ${notification.time}
 Repeatability: ${notification.repeatability}
 Completed: ${notification.completed}
     `);
-    if (notification.completed === 1 || notification.completed === true) { return; }
+
+    if (notification.completed === 1 || notification.completed === true) {
+        return;
+    }
 
     const timestamp = new Date(`${notification.date}T${notification.time}`).getTime();
 
-    scheduleNotification({ "title": notification.title, "body": notification.description || "", timestamp });
+    scheduleNotification({ "title": notification.title, "body": notification.description || "", timestamp, "repeatability": notification.repeatability, "originalNotification": notification });
+
     scheduledNotifications.push(notification);
-  
-    if (notification.repeatability === "daily") {
-        const currentDate = new Date(`${notification.date}T${notification.time}`);
-        const nextDate = new Date(currentDate.getTime() + 86400000);
-        const nextNotificationDate = nextDate.toISOString().split("T")[0];
-        const nextNotificationTime = nextDate.toLocaleTimeString("en-GB", { "hour": "2-digit", "minute": "2-digit" });
-
-        const newNotification = {
-            "title": notification.title,
-            "description": notification.description,
-            "date": nextNotificationDate,
-            "time": nextNotificationTime,
-            "repeatability": notification.repeatability,
-            "completed": 0,
-        };
-
-        fetch("http://localhost:3001/notifications", {
-            "method": "POST",
-            "headers": { "Content-Type": "application/json" },
-            "body": JSON.stringify(newNotification),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log(`Notification saved successfully: ${data}`);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-  
-        const newTimestamp = new Date(`${nextNotificationDate}T${nextNotificationTime}`).getTime();
-        scheduleNotification({ "title": newNotification.title, "body": newNotification.description || "", "timestamp": newTimestamp });
-    }
-
-    if (notification.repeatability === "weekly") {
-        const currentDate = new Date(`${notification.date}T${notification.time}`);
-        const nextDate = new Date(currentDate.getTime() + 604800000);
-        const nextNotificationDate = nextDate.toISOString().split("T")[0];
-        const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
-
-        const newNotification = {
-            "title": notification.title,
-            "description": notification.description,
-            "date": nextNotificationDate,
-            "time": nextNotificationTime,
-            "repeatability": notification.repeatability,
-            "completed": 0,
-        };
-
-        fetch("http://localhost:3001/notifications", {
-            "method": "POST",
-            "headers": { "Content-Type": "application/json" },
-            "body": JSON.stringify(newNotification),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log(`Notification saved successfully: ${data}`);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-  
-        const newTimestamp = new Date(`${nextNotificationDate}T${nextNotificationTime}`).getTime();
-        scheduleNotification({ "title": newNotification.title, "body": newNotification.description || "", "timestamp": newTimestamp });
-    }
-
-    if (notification.repeatability === "monthly") {
-        const currentDate = new Date(`${notification.date}T${notification.time}`);
-        let nextMonth = currentDate.getMonth() + 1;
-        let nextYear = currentDate.getFullYear();
-    
-        if (nextMonth === 12) {
-            nextMonth = 0;
-            nextYear++;
-        }
-    
-        const nextDate = new Date(nextYear, nextMonth, currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes());
-        let nextNotificationDate = nextDate.toISOString().split("T")[0];
-        let nextNotificationTime = nextDate.toTimeString().split(" ")[0];
-    
-        if (nextDate.getDate() !== currentDate.getDate()) {
-            nextDate.setDate(0);
-            nextNotificationDate = nextDate.toISOString().split("T")[0];
-            nextNotificationTime = nextDate.toTimeString().split(" ")[0];
-        }
-    
-        const newNotification = {
-            "title": notification.title,
-            "description": notification.description,
-            "date": nextNotificationDate,
-            "time": nextNotificationTime,
-            "repeatability": notification.repeatability,
-            "completed": 0,
-        };
-    
-        fetch("http://localhost:3001/notifications", {
-            "method": "POST",
-            "headers": { "Content-Type": "application/json" },
-            "body": JSON.stringify(newNotification),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log(`Notification saved successfully: ${data}`);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    
-        const newTimestamp = new Date(`${nextNotificationDate}T${nextNotificationTime}`).getTime();
-        scheduleNotification({ "title": newNotification.title, "body": newNotification.description || "", "timestamp": newTimestamp });
-    }
 });
 
 function createWindow() {
