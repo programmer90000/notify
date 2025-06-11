@@ -13,19 +13,11 @@ function getNextNotificationDate(currentDate, repeatability) {
         nextDate = new Date(currentDate.getTime() + 604800000); // +7 days
         break;
     case "monthly":
-        nextDate = new Date(currentDate);
-        let nextMonth = nextDate.getMonth() + 1;
-        let nextYear = nextDate.getFullYear();
-        if (nextMonth === 12) {
-            nextMonth = 0;
-            nextYear++;
-        }
-
-        nextDate = new Date(nextYear, nextMonth, currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes());
-
-        if (nextDate.getDate() !== currentDate.getDate()) {
-            nextDate.setDate(0);
-        }
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const daysInMonth = nextMonth.getDate();
+        const miliSecondsInMonth = daysInMonth * 86400000;
+        console.log(`nextDate = ${new Date(currentDate.getTime() + miliSecondsInMonth)}`); // +1 month
         break;
     default:
         nextDate = null;
