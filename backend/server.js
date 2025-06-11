@@ -65,3 +65,20 @@ app.put("/notifications/:id", (req, res) => {
         }
     });
 });
+
+app.put("/notifications/:id/complete", (req, res) => {
+    const { id } = req.params;
+    const { completed } = req.body;
+    db.run(
+        "UPDATE notifications SET completed = ? WHERE id = ?",
+        [completed ? 1 : 0, id],
+        function (err) {
+            if (err) {
+                console.error(err);
+                res.status(500).send({ "message": "Failed to update completion status" });
+            } else {
+                res.send({ "message": "Completion status updated" });
+            }
+        },
+    );
+});

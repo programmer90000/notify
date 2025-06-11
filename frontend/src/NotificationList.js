@@ -4,7 +4,7 @@ const { ipcRenderer } = window.require("electron");
 const NotificationList = ({ onNavigateBack }) => {
     const [notifications, setNotifications] = useState([]);
     const [editTarget, setEditTarget] = useState(null);
-
+    const [showCompleted, setShowCompleted] = useState(false);
 
     const loadNotifications = () => {
         fetch("http://localhost:3001/notifications/all")
@@ -47,6 +47,20 @@ const NotificationList = ({ onNavigateBack }) => {
         setEditTarget((prev) => { return { ...prev, [name]: value }; });
     };
 
+    const completed = notifications.filter((n) => { return n.completed; });
+    const pending = notifications.filter((n) => { return !n.completed; });
+    
+    const toggleComplete = (id, completed) => {
+        fetch(`http://localhost:3001/notifications/${id}/complete`, {
+            "method": "PUT",
+            "headers": { "Content-Type": "application/json" },
+            "body": JSON.stringify({ completed }),
+        })
+            .then((res) => { return res.json(); })
+            .then(loadNotifications)
+            .catch((err) => { return console.error("Completion error:", err); });
+    };
+
     useEffect(() => {
         loadNotifications();
     }, []);
@@ -64,11 +78,12 @@ const NotificationList = ({ onNavigateBack }) => {
                         <p className = "text-gray-500 text-center py-8">No notifications yet</p>
                     ) : (
                         <div className = "space-y-6">
-                            {notifications.map((notification) => { return (
+                            {pending.map((notification) => { return (
                                 <div key = {notification.id} className = "p-6 border border-gray-200 rounded-lg hover:shadow-md transition duration-200">
                                     <div className = "flex justify-between">
                                         <div className = "flex-1 min-w-0">
                                             <div className = "flex justify-between items-start">
+                                                <button onClick = {() => { return toggleComplete(notification.id, true); }} className = "px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Complete</button>
                                                 <h2 className = "text-xl font-bold text-gray-800 mb-2">{notification.title}</h2>
                                                 <span className = "ml-4 inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 whitespace-nowrap">
                                                     {notification.repeatability.charAt(0).toUpperCase() + notification.repeatability.slice(1)}
@@ -115,6 +130,28 @@ const NotificationList = ({ onNavigateBack }) => {
                             <button type = "submit" className = "px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Save</button>
                         </div>
                     </form>
+                </div>
+            )}
+            <button onClick = {() => { return setShowCompleted(!showCompleted); }} className = "mt-4 text-sm text-blue-700 hover:underline">{showCompleted ? "Hide Completed Tasks ▲" : "Show Completed Tasks ▼"}</button>
+            {showCompleted && (
+                <div className = "mt-4 border-t pt-4 space-y-4">
+                    <h3 className = "text-gray-700 font-semibold">Completed</h3>
+                    {completed.map((notification) => { return (
+                        <div key = {notification.id} className = "p-4 border border-green-300 rounded bg-green-50">
+                            <div className = "flex justify-between">
+                                <div className = "flex-1">
+                                    <h2 className = "text-lg font-semibold text-green-800 line-through">{notification.title}</h2>
+                                    <p className = "text-sm text-gray-600">{notification.description}</p>
+                                    <div className = "text-xs text-gray-500 mt-2">{notification.date} at {notification.time}</div>
+                                </div>
+                                <div className = "flex flex-col justify-start space-y-2 ml-4">
+                                    <button onClick = {() => { return toggleComplete(notification.id, false); }} className = "text-sm text-blue-600 hover:underline">Undo</button>
+                                    <button onClick = {() => { return handleDelete(notification.id); }} className = "text-sm text-red-600 hover:underline">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    ); })}
+
                 </div>
             )}
         </div>
