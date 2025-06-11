@@ -31,6 +31,43 @@ Completed: ${notification.completed}
 
     scheduleNotification({ "title": notification.title, "body": notification.description || "", timestamp });
     scheduledNotifications.push(notification);
+  
+    if (notification.repeatability === "daily") {
+        const currentDate = new Date(`${notification.date}T${notification.time}`);
+        const nextDate = new Date(currentDate.getTime() + 86400000);
+        const nextNotificationDate = nextDate.toISOString().split("T")[0];
+        const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+
+        const newNotification = {
+            "title": notification.title,
+            "description": notification.description,
+            "date": nextNotificationDate,
+            "time": nextNotificationTime,
+            "repeatability": notification.repeatability,
+            "completed": 0,
+        };
+
+        fetch("http://localhost:3001/notifications", {
+            "method": "POST",
+            "headers": { "Content-Type": "application/json" },
+            "body": JSON.stringify(newNotification),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(`Notification saved successfully: ${data}`);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+  
+        const newTimestamp = new Date(`${nextNotificationDate}T${nextNotificationTime}`).getTime();
+        scheduleNotification({ "title": newNotification.title, "body": newNotification.description || "", "timestamp": newTimestamp });
+    }
 });
 
 function createWindow() {
