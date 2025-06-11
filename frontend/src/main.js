@@ -36,7 +36,7 @@ Completed: ${notification.completed}
         const currentDate = new Date(`${notification.date}T${notification.time}`);
         const nextDate = new Date(currentDate.getTime() + 86400000);
         const nextNotificationDate = nextDate.toISOString().split("T")[0];
-        const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+        const nextNotificationTime = nextDate.toLocaleTimeString("en-GB", { "hour": "2-digit", "minute": "2-digit" });
 
         const newNotification = {
             "title": notification.title,
