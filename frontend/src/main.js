@@ -105,6 +105,57 @@ Completed: ${notification.completed}
         const newTimestamp = new Date(`${nextNotificationDate}T${nextNotificationTime}`).getTime();
         scheduleNotification({ "title": newNotification.title, "body": newNotification.description || "", "timestamp": newTimestamp });
     }
+
+    if (notification.repeatability === "monthly") {
+        const currentDate = new Date(`${notification.date}T${notification.time}`);
+        let nextMonth = currentDate.getMonth() + 1;
+        let nextYear = currentDate.getFullYear();
+    
+        if (nextMonth === 12) {
+            nextMonth = 0;
+            nextYear++;
+        }
+    
+        const nextDate = new Date(nextYear, nextMonth, currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes());
+        let nextNotificationDate = nextDate.toISOString().split("T")[0];
+        let nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+    
+        if (nextDate.getDate() !== currentDate.getDate()) {
+            nextDate.setDate(0);
+            nextNotificationDate = nextDate.toISOString().split("T")[0];
+            nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+        }
+    
+        const newNotification = {
+            "title": notification.title,
+            "description": notification.description,
+            "date": nextNotificationDate,
+            "time": nextNotificationTime,
+            "repeatability": notification.repeatability,
+            "completed": 0,
+        };
+    
+        fetch("http://localhost:3001/notifications", {
+            "method": "POST",
+            "headers": { "Content-Type": "application/json" },
+            "body": JSON.stringify(newNotification),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(`Notification saved successfully: ${data}`);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    
+        const newTimestamp = new Date(`${nextNotificationDate}T${nextNotificationTime}`).getTime();
+        scheduleNotification({ "title": newNotification.title, "body": newNotification.description || "", "timestamp": newTimestamp });
+    }
 });
 
 function createWindow() {
