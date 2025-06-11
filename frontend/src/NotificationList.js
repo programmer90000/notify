@@ -137,7 +137,7 @@ const NotificationList = ({ onNavigateBack }) => {
                 <div className = "mt-4 border-t pt-4 space-y-4">
                     <h3 className = "text-gray-700 font-semibold">Completed</h3>
                     {completed.map((notification) => { return (
-                        <div key = {notification.id} className = "p-4 border border-green-300 rounded bg-green-50">
+                        <div key = {notification.id} className = "p-4 border border-indigo-800 rounded bg-green-50">
                             <div className = "flex justify-between">
                                 <div className = "flex-1">
                                     <h2 className = "text-lg font-semibold text-green-800 line-through">{notification.title}</h2>
