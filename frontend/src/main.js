@@ -16,6 +16,15 @@ function scheduleNotification({ title, body, timestamp }) {
 }
   
 ipcMain.on("schedule-notification", (event, notification) => {
+    console.log(`
+Notification Record:
+Title: ${notification.title}
+Description: ${notification.description}
+Date: ${notification.date}
+Time: ${notification.time}
+Repeatability: ${notification.repeatability}
+Completed: ${notification.completed}
+    `);
     if (notification.completed === 1 || notification.completed === true) { return; }
 
     const timestamp = new Date(`${notification.date}T${notification.time}`).getTime();
