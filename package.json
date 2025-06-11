@@ -6,6 +6,7 @@
     "author": "",
     "license": "",
     "scripts": {
+        "start": "cd frontend/ && npm run build && concurrently \"cd ../backend/ &&  node server.js\" \"npm start\"",
         "lint": "npx eslint ."
     },
     "workspaces": [

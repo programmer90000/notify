@@ -8,6 +8,7 @@ package-lock.json
 
 # Generated Files
 frontend/build/
+frontend/dist/
 
 # Database Files
 *.db
