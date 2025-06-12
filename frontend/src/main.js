@@ -15,11 +15,15 @@ function getNextNotificationDate(currentDate, repeatability) {
         break;
     case "monthly":
         const lastDayCurrentMonth = dayjs().endOf("month");
+        const lastDayCurrentMonthDay = lastDayCurrentMonth.date();
         const lastDayNextMonth = dayjs().add(1, "month").endOf("month");
+        const lastDayNextMonthDay = lastDayNextMonth.date();
         const currentDateOfMonth = currentDate.getDate();
-        console.log(lastDayCurrentMonth.format("YYYY-MM-DD"));
-        console.log(lastDayNextMonth.format("YYYY-MM-DD"));
-        console.log(currentDateOfMonth);
+        console.log(`
+The last day of the current month is: ${lastDayCurrentMonthDay}.
+The last day of the next month is: ${lastDayNextMonthDay}.
+The current date of the month is: ${currentDateOfMonth}
+            `);
         break;
     default:
         nextDate = null;
