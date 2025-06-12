@@ -3,10 +3,24 @@ const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 let mainWindow;
 let scheduledNotifications = [];
 
-function getLastDateOfCurrentMonth(date) {
-    const year = date.getUTCFullYear();
-    const month = date.getUTCMonth();
-    return new Date(Date.UTC(year, month + 1, 0)).toISOString().slice(0, 10);
+function getNextMonthlyDate(currentDate) {
+    const year = currentDate.getUTCFullYear();
+    const month = currentDate.getUTCMonth();
+    const day = currentDate.getUTCDate();
+
+    const lastDayCurrentMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    const lastDayNextMonth = new Date(Date.UTC(year, month + 2, 0)).getUTCDate();
+
+    let nextDay;
+
+    if (lastDayNextMonth < lastDayCurrentMonth && day === lastDayCurrentMonth) {
+        // Only if next month is shorter AND current date is last day of current month
+        nextDay = lastDayNextMonth;
+    } else {
+        nextDay = Math.min(day, lastDayNextMonth);
+    }
+
+    return new Date(Date.UTC(year, month + 1, nextDay));
 }
 
 function getNextNotificationDate(currentDate, repeatability) {
@@ -20,18 +34,9 @@ function getNextNotificationDate(currentDate, repeatability) {
         break;
     case "monthly":
         console.log(`
-            The last date of January is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2024, 0, 1)))}
-            The last date of February is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 1, 1)))}
-            The last date of March is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 2, 1)))}
-            The last date of April is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 3, 1)))}
-            The last date of May is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 4, 1)))}
-            The last date of June is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 5, 1)))}
-            The last date of July is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 6, 1)))}
-            The last date of August is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 7, 1)))}
-            The last date of September is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 8, 1)))}
-            The last date of October is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 9, 1)))}
-            The last date of November is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 10, 1)))}
-            The last date of December is: ${getLastDateOfCurrentMonth(new Date(Date.UTC(2025, 11, 1)))}
+January 31st: ${getNextMonthlyDate(new Date(Date.UTC(2023, 0, 31)))}
+February 28th: ${getNextMonthlyDate(new Date(Date.UTC(2023, 1, 28)))}
+March 15th: ${getNextMonthlyDate(new Date(Date.UTC(2023, 2, 15)))}
             `);
             
         break;
