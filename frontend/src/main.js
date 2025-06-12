@@ -3,6 +3,10 @@ const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 let mainWindow;
 let scheduledNotifications = [];
 
+function getLastDayOfMonth(date) {
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+}
+
 function getNextNotificationDate(currentDate, repeatability) {
     let nextDate;
     switch (repeatability) {
@@ -13,11 +17,9 @@ function getNextNotificationDate(currentDate, repeatability) {
         nextDate = new Date(currentDate.getTime() + 604800000); // +7 days
         break;
     case "monthly":
-        const now = new Date();
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const daysInMonth = nextMonth.getDate();
-        const miliSecondsInMonth = daysInMonth * 86400000;
-        console.log(`nextDate = ${new Date(currentDate.getTime() + miliSecondsInMonth)}`); // +1 month
+        const lastDayUTC = getLastDayOfMonth(currentDate);
+
+        console.log("Number of miliseconds in month:", lastDayUTC.getUTCDate() * 86400000);
         break;
     default:
         nextDate = null;
