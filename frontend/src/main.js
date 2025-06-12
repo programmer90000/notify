@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Notification } = require("electron");
+const dayjs = require("dayjs");
 
 let mainWindow;
 let scheduledNotifications = [];
@@ -13,6 +14,10 @@ function getNextNotificationDate(currentDate, repeatability) {
         nextDate = new Date(currentDate.getTime() + 604800000); // +7 days
         break;
     case "monthly":
+        const lastDayCurrentMonth = dayjs().endOf("month");
+        const lastDayNextMonth = dayjs().add(1, "month").endOf("month");
+        console.log(lastDayCurrentMonth.format("YYYY-MM-DD"));
+        console.log(lastDayNextMonth.format("YYYY-MM-DD"));
         break;
     default:
         nextDate = null;
