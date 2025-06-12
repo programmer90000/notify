@@ -18,8 +18,9 @@ function getNextNotificationDate(currentDate, repeatability) {
         break;
     case "monthly":
         const lastDayUTC = getLastDayOfMonth(currentDate);
-
         console.log("Number of miliseconds in month:", lastDayUTC.getUTCDate() * 86400000);
+        nextMonthDate = new Date(currentDate.getTime() + (lastDayUTC.getUTCDate() * 86400000));
+        console.log("Next month date:", nextMonthDate);
         break;
     default:
         nextDate = null;
