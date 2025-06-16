@@ -14,16 +14,8 @@ function getNextNotificationDate(currentDate, repeatability) {
         nextDate = new Date(currentDate.getTime() + 604800000); // +7 days
         break;
     case "monthly":
-        const lastDayCurrentMonth = dayjs().endOf("month");
-        const lastDayCurrentMonthDay = lastDayCurrentMonth.date();
-        const lastDayNextMonth = dayjs().add(1, "month").endOf("month");
-        const lastDayNextMonthDay = lastDayNextMonth.date();
-        const currentDateOfMonth = currentDate.getDate();
-        console.log(`
-The last day of the current month is: ${lastDayCurrentMonthDay}.
-The last day of the next month is: ${lastDayNextMonthDay}.
-The current date of the month is: ${currentDateOfMonth}
-            `);
+        nextDate = new Date(currentDate);
+        nextDate.setMonth(nextDate.getMonth() + 1); // + 1 month
         break;
     default:
         nextDate = null;
@@ -35,7 +27,6 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
     const delay = timestamp - Date.now();
 
     function showNotificationAndScheduleNext() {
-
         new Notification({ title, body }).show();
 
         if (!repeatability) { return; }
@@ -47,6 +38,12 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
 
         const nextNotificationDate = nextDate.toISOString().split("T")[0];
         const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+
+        const shouldStopAfterThis = repeatability === "monthly" && originalNotification && originalNotification.alreadyRepeated;
+
+        if (shouldStopAfterThis) {
+            return;
+        }
 
         const newNotification = {
             title,
