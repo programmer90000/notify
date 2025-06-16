@@ -13,6 +13,9 @@
         "frontend",
         "backend"
     ],
+    "dependencies": {
+        "auto-launch": "5.0.6"
+    },
     "devDependencies": {
         "@stylistic/eslint-plugin": "2.7.2",
         "@stylistic/eslint-plugin-js": "2.7.2",

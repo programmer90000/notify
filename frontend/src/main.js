@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain, Notification } = require("electron");
-const dayjs = require("dayjs");
 
 let mainWindow;
 let scheduledNotifications = [];
@@ -132,4 +131,8 @@ app.whenReady().then(createWindow);
 
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") { app.quit(); }
+});
+
+app.setLoginItemSettings({
+    "openAtLogin": true,
 });
