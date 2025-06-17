@@ -85,7 +85,19 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
         return;
     }
 
-    setTimeout(showNotificationAndScheduleNext, delay);
+    const MAX_DELAY = 2147483647;
+    if (delay <= MAX_DELAY) {
+        setTimeout(showNotificationAndScheduleNext, delay);
+    } else {
+        setTimeout(() => {
+            const remainingDelay = timestamp - Date.now();
+            if (remainingDelay > 0) {
+                scheduleNotification({ title, body, timestamp, repeatability, originalNotification });
+            } else {
+                showNotificationAndScheduleNext();
+            }
+        }, MAX_DELAY);
+    }
 }
 
 ipcMain.on("schedule-notification", (event, notification) => {
