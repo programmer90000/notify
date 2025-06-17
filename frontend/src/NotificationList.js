@@ -61,6 +61,10 @@ const NotificationList = ({ onNavigateBack }) => {
             .catch((err) => { return console.error("Completion error:", err); });
     };
 
+    const formatTime = (timeString) => {
+        return timeString.length > 5 ? timeString.substring(0, 5) : timeString;
+    };
+
     useEffect(() => {
         loadNotifications();
     }, []);
@@ -102,7 +106,7 @@ const NotificationList = ({ onNavigateBack }) => {
                                     </div>
                                     <div className = "mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm text-gray-500">
                                         <span>Date: {notification.date}</span>
-                                        <span>Time: {notification.time}</span>
+                                        <span>Time: {formatTime(notification.time)}</span>
                                     </div>
                                 </div>
                             ); })}
@@ -142,7 +146,7 @@ const NotificationList = ({ onNavigateBack }) => {
                                 <div className = "flex-1">
                                     <h2 className = "text-lg font-semibold text-green-800 line-through">{notification.title}</h2>
                                     <p className = "text-sm text-gray-600">{notification.description}</p>
-                                    <div className = "text-xs text-gray-500 mt-2">{notification.date} at {notification.time}</div>
+                                    <div className = "text-xs text-gray-500 mt-2">{notification.date} at {formatTime(notification.time)}</div>
                                 </div>
                                 <div className = "flex flex-col justify-start space-y-2 ml-4">
                                     <button onClick = {() => { return toggleComplete(notification.id, false); }} className = "text-sm text-blue-600 hover:underline">Undo</button>
