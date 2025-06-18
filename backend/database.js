@@ -1,6 +1,16 @@
+const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
+const fs = require("fs");
+const os = require("os");
 
-const db = new sqlite3.Database("./notifications.db");
+const appDataDir = path.join(os.homedir(), ".notify-app");
+if (!fs.existsSync(appDataDir)) {
+    fs.mkdirSync(appDataDir);
+}
+
+const dbPath = path.join(appDataDir, "notifications.db");
+
+const db = new sqlite3.Database(dbPath);
 
 db.run(`
     CREATE TABLE IF NOT EXISTS notifications (
