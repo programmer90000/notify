@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Notification } = require("electron");
+const path = require("path");
 
 let mainWindow;
 let scheduledNotifications = [];
@@ -122,6 +123,8 @@ Completed: ${notification.completed}
     scheduledNotifications.push(notification);
 });
 
+const isDev = !app.isPackaged;
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         "width": 800,
@@ -132,7 +135,11 @@ function createWindow() {
         },
     });
 
-    mainWindow.loadURL("http://localhost:3000");
+    if (isDev) {
+        mainWindow.loadURL("http://localhost:3000");
+    } else {
+        mainWindow.loadFile(path.join(__dirname, "frontend/dist/index.html"));
+    }
 
     mainWindow.on("closed", () => {
         mainWindow = null;
