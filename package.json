@@ -24,11 +24,8 @@
         ],
         "extraResources": [
             {
-                "from": "backend/notifications.db",
-                "to": "notifications.db",
-                "filter": [
-                    "**/*"
-                ]
+                "from": "backend",
+                "to": "app/backend"
             }
         ],
         "directories": {
@@ -41,7 +38,10 @@
     ],
     "dependencies": {
         "concurrently": "9.1.2",
-        "node-fetch": "3.3.2"
+        "node-fetch": "3.3.2",
+        "express": "5.1.0",
+        "cors": "2.8.5",
+        "sqlite3": "5.1.7"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "2.7.2",
