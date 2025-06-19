@@ -10,6 +10,8 @@
         "postinstall": "electron-builder install-app-deps",
         "build": "cd frontend && npm run build && cd .. && electron-builder",
         "start": "cd frontend/ && npm run build && concurrently \"cd ../backend/ &&  node server.js\" \"npm start\"",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder",
         "lint": "npx eslint ."
     },
     "build": {
@@ -30,6 +32,21 @@
         ],
         "directories": {
             "buildResources": "build"
+        },
+        "win": {
+            "target": {
+                "target": "nsis"
+            }
+        },
+        "mac": {
+            "target": {
+                "target": "dmg"
+            }
+        },
+        "linux": {
+            "target": {
+                "target": "deb"
+            }
         }
     },
     "workspaces": [
