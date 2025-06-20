@@ -1,6 +1,11 @@
 const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
+const fs = require("fs");
+const logFile = path.join(app.getPath("userData"), "main.log");
+const logStream = fs.createWriteStream(logFile, { "flags": "a" });
+console.log = (...args) => { return logStream.write(`${args.join(" ")}\n`); };
+console.error = (...args) => { return logStream.write(`[ERR] ${args.join(" ")}\n`); };
 
 let mainWindow;
 let backendProcess;
@@ -129,8 +134,8 @@ Completed: ${notification.completed}
 const isDev = !app.isPackaged;
 
 
-function startBackend() {
-    const backendPath = isDev ? path.join(__dirname, "backend", "server.js") : path.join(process.resourcesPath, "app", "backend", "server.js");
+function startBackend(callback) {
+    const backendPath = isDev ? path.join(__dirname, "backend", "server.js") : path.join(process.resourcesPath, "app.asar.unpacked", "backend", "server.js");
     
     console.log("Starting backend from:", backendPath);
     
@@ -139,7 +144,13 @@ function startBackend() {
     });
     
     backendProcess.stdout.on("data", (data) => {
-        console.log(`Backend: ${data.toString()}`);
+        const message = data.toString();
+        console.log(`Backend: ${message}`);
+
+        // Wait until backend is listening before creating window
+        if (message.includes("Server listening on port 3001") && callback) {
+            callback();
+        }
     });
     
     backendProcess.stderr.on("data", (data) => {
@@ -177,11 +188,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    // Start backend first, then create window
-    startBackend();
-    
-    // Wait a moment for backend to start, then create window
-    setTimeout(createWindow, 2000);
+    startBackend(createWindow);
 });
 
 app.on("window-all-closed", () => {
