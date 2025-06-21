@@ -128,6 +128,19 @@ Completed: ${notification.completed}
         return;
     }
 
+    db.get("SELECT * FROM notifications WHERE id = ?", [notification.id], (err, row) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        if (!row) {
+            console.log("Notification does not exist in database, skipping...");
+            return;
+        }
+    },
+    );
+
     scheduledNotifications.push(notification);
 });
 
