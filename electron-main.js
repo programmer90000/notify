@@ -120,13 +120,13 @@ Repeatability: ${notification.repeatability}
 Completed: ${notification.completed}
     `);
 
-    if (notification.completed === 1 || notification.completed === true) {
-        return;
-    }
-
     const timestamp = new Date(`${notification.date}T${notification.time}`).getTime();
 
     scheduleNotification({ "title": notification.title, "body": notification.description || "", timestamp, "repeatability": notification.repeatability, "originalNotification": notification });
+
+    if (notification.completed === 1 || notification.completed === true) {
+        return;
+    }
 
     scheduledNotifications.push(notification);
 });
