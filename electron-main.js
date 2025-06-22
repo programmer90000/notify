@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const db = require("./backend/database.js");
 const logFile = path.join(app.getPath("userData"), "main.log");
 const logStream = fs.createWriteStream(logFile, { "flags": "a" });
 console.log = (...args) => { return logStream.write(`${args.join(" ")}\n`); };
