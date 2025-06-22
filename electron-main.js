@@ -55,7 +55,7 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
         }
 
         const newNotification = {
-            title,
+            "title": title.endsWith(" - Completed") ? title.replace(" - Completed", "") : title,
             "description": body,
             "date": nextNotificationDate,
             "time": nextNotificationTime,
