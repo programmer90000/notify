@@ -127,3 +127,64 @@ The notification system features:
 - Very long-delay notifications (beyond 24.8 days)
 
 ---
+
+## backend/database.js
+
+### Table of Contents
+
+1. [Overview](#database-overview)
+2. [Database Configuration](#database-configuration)
+3. [Schema](#database-schema)
+4. [File Structure](#file-structure)
+5. [Initialization](#initialization)
+
+### <a id="database-overview">Overview</a>
+
+backend/database.js is responsible for:
+- Setting up the SQLite database for the notification application
+- Managing the application data directory
+- Providing a database connection interface
+- Ensuring proper database schema initialization
+
+### <a id="database-configuration">Database Configuration</a>
+
+Key configuration aspects:
+- Database file location: ~/.notify-app/notifications.db
+- SQLite in verbose mode for better error reporting
+- Automatic creation of application data directory if it doesn't exist
+- Singleton database connection exported for the entire application
+
+### <a id="database-schema">Schema</a>
+
+The database contains a single table notifications with the following structure:
+
+| Column         | Type     | Description                                           |
+|----------------|----------|-------------------------------------------------------|
+| `id`           | INTEGER  | Primary key, auto-incrementing                        |
+| `title`        | TEXT     | Notification title                                    |
+| `description`  | TEXT     | Notification body/content                             |
+| `date`         | TEXT     | Scheduled date                                        |
+| `time`         | TEXT     | Scheduled time                                        |
+| `repeatability`| TEXT     | Repeat pattern ('none', 'daily', 'weekly', 'monthly') |
+| `completed`    | INTEGER  | Completion status (0 = incomplete, 1 = complete)      |
+
+### <a id="database-file-structure">File Structure</a>
+
+The module:
+- Imports required Node.js modules (path, sqlite3, fs, os)
+- Defines the application data directory path (~/.notify-app)
+- Creates the directory if it doesn't exist
+- Defines the database file path (notifications.db in the app directory)
+- Creates a new SQLite database connection
+- Initializes the database schema
+- Exports the database connection
+
+### <a id="database-initialization">Initialization</a>
+
+The database is initialized with:
+- Automatic table creation if not exists
+- Proper column definitions for all notification attributes
+- Default value for completed status (0/incomplete)
+- Persistent storage in the user's home directory
+
+The exported database connection provides the interface for all CRUD operations on notifications throughout the application.
