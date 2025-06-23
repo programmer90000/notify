@@ -318,3 +318,67 @@ This file should be removed before release because:
 |-------|-----|-------------|-------------|-------------|------------|---------------|-----------|
 | 0 | 0 | 'Notification 1' | 'This is notification 1' | '2025-06-23'| '16:30' | 'daily' | 1 |
 | 1 | 1 | 'Notification 2' | 'This is notification 2' | '2025-06-24'| '16:30' | 'daily' | 0 |
+
+## frontend/src/NotificationApp.js
+
+## Table of Contents
+1. [Overview](#notification-app-overview)
+2. [State Management](#notification-app-state-management)
+3. [Navigation](#notification-app-navigation)
+4. [Notification Submission](#notification-app-submission)
+5. [API Communication](#notification-app-api-communication)
+6. [Form Components](#form-components)
+
+### <a id="notification-app-overview"></a>Overview
+Screen that allows the creation of notifications. The screen requires the notification title, date, time and repeatability to be set. There is also a field to set a description for the notification
+
+
+### <a id="notification-app-state-management"></a>State Management
+
+| State | Type | Description | Default Value |
+|------------------|----------|-------------------------------------------------------|---------------|
+| `currentScreen`  | string   | Tracks active view ('setter' or 'list')               | `"setter"`    |
+| `title`          | string   | Notification title input                              | `""`          |
+| `description`    | string   | Notification description input                        | `""`          |
+| `date`           | string   | Scheduled date (YYYY-MM-DD format)                    | `""`          |
+| `time`           | string   | Scheduled time (HH:MM format)                         | `""`          |
+| `repeatability`  | string   | Repeat pattern ('none', 'daily', 'weekly', 'monthly') | `"none"`      |
+
+### <a id="notification-app-navigation"></a>Navigation
+| Method | 	Description |
+|-------------------|---------------------------------------|
+|navigateToList()   | Switches to notification list view    |
+|navigateToSetter() | Returns to notification creation view |
+
+### <a id="notification-app-submission"></a>Notification Submission Flow
+
+1. User fills form and submits
+2. Data sent to Electron main process via IPC
+3. POST request to backend API (/notifications)
+4. Form reset on success
+5. Subsequent GET request fetches all notifications
+
+### <a id="notification-app-api-communication"></a>API Communication
+```javascript
+// Sending notification
+ipcRenderer.send("schedule-notification", data);
+
+// Saving to database
+fetch("http://localhost:3001/notifications", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(data)
+});
+
+// Fetching all notifications
+fetch("http://localhost:3001/notifications/all")
+```
+
+### <a id="form-components"></a>Form Components
+| Field     |	Type    |Required| Notes            |
+|-----------|-----------|--------|------------------|
+|Title      |text input |Yes     |Maximum 100 chars |
+|Description|textarea	|No      |Optional details  |
+|Date       |date picker|Yes     |Future dates only |
+|Time       |time picker|Yes     |24-hour format    |
+|Repeat     |dropdown   |Yes     |Defaults to 'none'|
