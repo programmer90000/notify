@@ -321,7 +321,7 @@ This file should be removed before release because:
 
 ## frontend/src/NotificationApp.js
 
-## Table of Contents
+### Table of Contents
 1. [Overview](#notification-app-overview)
 2. [State Management](#notification-app-state-management)
 3. [Navigation](#notification-app-navigation)
@@ -382,3 +382,105 @@ fetch("http://localhost:3001/notifications/all")
 |Date       |date picker|Yes     |Future dates only |
 |Time       |time picker|Yes     |24-hour format    |
 |Repeat     |dropdown   |Yes     |Defaults to 'none'|
+
+## frontend/src/NotificationList.js
+
+### Table of Contents
+
+1. [Overview](#notification-list-overview)
+2. [State Management](#notification-list-state-management)
+3. [API Integration](#notification-list-api-integration)
+4. [Component Features](#notification-list-features)
+5. [UI Structure](#notification-list-ui-structure)
+6. [Special Features](#notification-list-special-features)
+
+### <a id="notification-list-overview"></a>Overview
+
+The NotificationList component displays all scheduled notifications in a paginated view, allowing users to:
+- View pending and completed notifications
+- Edit existing notifications
+- Mark notifications as complete/incomplete
+- Delete notifications
+- Navigate back to the notification creation screen
+
+### <a id="notification-list-state-management"></a>State Management
+
+| State         | Type    | Description                                       | Default Value |
+|---------------|---------|---------------------------------------------------|---------------|
+| notifications | array   | Array of all notification objects from database   | []            |
+| editTarget    | object  | Currently selected notification for editing       | null          |
+| showCompleted | boolean | Toggle for showing/hiding completed notifications | false         |
+
+### <a id="notification-list-api-integration"></a>API Integration
+
+| Endpoint                    | Method | Purpose                 | Component Usage          |
+|-----------------------------|--------|-------------------------|--------------------------|
+| /notifications/all          | GET    | Fetch all notifications | Load initial list        |
+| /notifications/:id          | DELETE | Remove notification     | Handle delete action     |
+| /notifications/:id          | PUT    | Update notification     | Handle edit submission   |
+| /notifications/:id/complete | PUT    | Toggle completion       | Mark complete/incomplete |
+
+
+### <a id="notification-list-features"></a>Component Features
+
+1. Notification Loading
+
+- Automatically fetches notifications on component mount
+- Separates into pending/completed lists
+- Formats time display consistently
+
+2. Notification Management
+
+- Edit functionality with modal form
+- Delete confirmation
+- Completion toggling
+
+3. UI Controls
+
+- Show/hide completed notifications
+- Navigation back to creation screen
+- Responsive design
+
+### <a id="notification-list-ui-structure"></a>UI Structure
+
+1. Main Container
+
+- Header with title and back button
+- Empty state handling
+
+2. Pending Notifications List
+
+- Card for each notification
+- Complete/Edit/Delete buttons
+- Display of title, description, date/time
+
+3. Completed Notifications Section (toggleable)
+
+- Styled differently (green background, strikethrough)
+- Undo/Delete buttons
+
+4. Edit Modal
+
+- Form with all notification fields
+- Cancel/Save buttons
+
+### <a id="notification-list-special-features"></a>Special Features
+
+1. IPC Integration
+
+- Sends updated notifications to Electron main process via schedule-notification IPC event when editing
+
+2. Time Formatting
+
+- Ensures consistent time display with formatTime() helper
+
+3. Responsive Design
+
+- Adapts layout for different screen sizes
+- Scrollable description areas
+
+4. Visual Feedback
+
+- Different styling for pending vs. completed
+- Hover effects on interactive elements
+- Modal overlay for editing
