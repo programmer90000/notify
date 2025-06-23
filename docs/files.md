@@ -2,6 +2,8 @@
 
 ## Contents
 - [electron-main.js](#electron-mainjs)
+- [backend/database.js](#backenddatabasejs)
+- [backend/server.js](#backendserverjs)
 
 ---
 
@@ -188,3 +190,65 @@ The database is initialized with:
 - Persistent storage in the user's home directory
 
 The exported database connection provides the interface for all CRUD operations on notifications throughout the application.
+
+## backend/server.js
+
+### Table of Contents
+
+1. [Overview](#server-overview)
+2. [Server Configuration](#server-configuration)
+3. [API Endpoints](#api-endpoints)
+4. [Database Integration](#database-integration)
+5. [Error Handling](#server-error-handling)
+6. [Special Cases](#server-special-cases)
+
+### <a id="server-overview">Overview</a>
+
+`backend/server.js` is the main Express server file that:
+- Creates and configures the Express application
+- Sets up CORS and JSON middleware
+- Defines RESTful API endpoints for notification management
+- Integrates with the SQLite database
+- Handles server startup on port 3001
+
+### <a id="server-configuration">Server Configuration</a>
+
+- Express server running on port 3001
+- CORS enabled for all routes
+- JSON body parsing middleware
+- Database connection imported from database.js
+- Console log confirmation when server starts
+
+### <a id="api-endpoints">API Endpoints</a>
+
+| Endpoint | Method | Description | Request Body/Params | Response |
+|-------------------------------|----------|--------------------------------------|------------------------------------------------------------------------------------|------------------------------|
+| `/notifications`              | `POST`   | Create new notification              | ```json { "title": "...", "description": "...", "date": "...", "time": "...", "repeatability": "..." } ``` | ```json {"message": "..."}``` |
+| `/notifications/all`          | `GET`    | Get all notifications                | -                                                                                  | Array of notification objects|
+| `/notifications/:id`          | `DELETE` | Delete notification by ID            | `:id` (URL parameter)                                                              | ```json {"message": "..."}``` |
+| `/notifications/:id`          | `PUT`    | Update notification by ID            | `:id` + ```json { "title": "...", "description": "...", "date": "...", "time": "...", "repeatability": "..." } ``` | ```json {"message": "..."}``` |
+| `/notifications/:id/complete` | `PUT`    | Toggle completion status             | `:id` + ```json { "completed": boolean } ```                                       | ```json {"message": "..."}``` |
+
+### <a id="database-integration">Database Integration</a>
+
+The server:
+- Imports the SQLite database connection from database.js
+- Executes parameterized queries for all operations
+- Handles database errors appropriately
+- Maintains data consistency through transactions
+
+### <a id="server-error-handling">Error Handling</a>
+
+Standardized error handling:
+- Database errors are logged to console
+- 500 status code returned for database errors
+- Consistent error message format: {message: "..."}
+- Success responses include operation confirmation
+
+### <a id="server-special-cases">Special cases handled</a>
+
+- Database connection issues
+- Invalid SQL queries
+- Missing parameters
+- Invalid notification IDs
+
