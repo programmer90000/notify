@@ -3,6 +3,8 @@ const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const db = require("./backend/database.js");
+
+// Set up logging to a file
 const logFile = path.join(app.getPath("userData"), "main.log");
 const logStream = fs.createWriteStream(logFile, { "flags": "a" });
 console.log = (...args) => { return logStream.write(`${args.join(" ")}\n`); };
@@ -35,6 +37,7 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
     const delay = timestamp - Date.now();
 
     function showNotificationAndScheduleNext() {
+        // Check if the notification already exists in the database and is marked as completed
         db.get(
             "SELECT * FROM notifications WHERE title = ? AND date = ? AND time = ?",
             [title, originalNotification.date, originalNotification.time],
@@ -61,7 +64,7 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
                     
                     const nextNotificationDate = nextDate.toISOString().split("T")[0];
                     const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
-                    
+
                     const newNotification = {
                         "title": title.endsWith(" - Completed") ? title.replace(" - Completed", "") : title,
                         "description": body,
@@ -83,6 +86,7 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
                         .then((data) => {
                             console.log(`Repeated notification saved: ${JSON.stringify(data)}`);
                             const nextTimestamp = new Date(`${newNotification.date}T${newNotification.time}`).getTime();
+                            // Generate a new notification object for repeating notifications
                             scheduleNotification({
                                 "title": newNotification.title,
                                 "body": newNotification.description || "",
@@ -101,6 +105,7 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
                 console.log("Showing notification:", title);
                 new Notification({ title, body }).show();
 
+                // Handle repeatability logic
                 if (!repeatability) { return; }
 
                 const currentDate = new Date(timestamp);
@@ -111,6 +116,7 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
                 const nextNotificationDate = nextDate.toISOString().split("T")[0];
                 const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
 
+                // Stop monthly notifications repeating multiple times
                 const shouldStopAfterThis = repeatability === "monthly" && originalNotification && originalNotification.alreadyRepeated;
 
                 if (shouldStopAfterThis) {
