@@ -35,59 +35,80 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
     const delay = timestamp - Date.now();
 
     function showNotificationAndScheduleNext() {
-        console.log("Reached this line");
-        new Notification({ title, body }).show();
-
-        if (!repeatability) { return; }
-
-        const currentDate = new Date(timestamp);
-        const nextDate = getNextNotificationDate(currentDate, repeatability);
-
-        if (!nextDate) { return; }
-
-        const nextNotificationDate = nextDate.toISOString().split("T")[0];
-        const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
-
-        const shouldStopAfterThis = repeatability === "monthly" && originalNotification && originalNotification.alreadyRepeated;
-
-        if (shouldStopAfterThis) {
-            return;
-        }
-
-        const newNotification = {
-            "title": title.endsWith(" - Completed") ? title.replace(" - Completed", "") : title,
-            "description": body,
-            "date": nextNotificationDate,
-            "time": nextNotificationTime,
-            repeatability,
-            "completed": 0,
-        };
-
-        fetch("http://localhost:3001/notifications", {
-            "method": "POST",
-            "headers": { "Content-Type": "application/json" },
-            "body": JSON.stringify(newNotification),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
+        db.get(
+            "SELECT * FROM notifications WHERE title = ? AND date = ? AND time = ?",
+            [title, originalNotification.date, originalNotification.time],
+            (err, row) => {
+                if (err) {
+                    console.error("Database error:", err);
+                    return;
                 }
-                return response.json();
-            })
-            .then((data) => {
-                console.log(`Notification saved successfully: ${JSON.stringify(data)}`);
-                const nextTimestamp = new Date(`${newNotification.date}T${newNotification.time}`).getTime();
-                scheduleNotification({
-                    "title": newNotification.title,
-                    "body": newNotification.description || "",
-                    "timestamp": nextTimestamp,
-                    "repeatability": newNotification.repeatability,
-                    "originalNotification": newNotification,
-                });
-            })
-            .catch((error) => {
-                console.error("Failed to save notification:", error);
-            });
+
+                if (!row) {
+                    console.log("Notification not found in database, skipping...");
+                    return;
+                }
+
+                if (row.completed === 1) {
+                    console.log("Notification is marked as completed, skipping...");
+                    return;
+                }
+
+                console.log("Showing notification:", title);
+                new Notification({ title, body }).show();
+
+                if (!repeatability) { return; }
+
+                const currentDate = new Date(timestamp);
+                const nextDate = getNextNotificationDate(currentDate, repeatability);
+
+                if (!nextDate) { return; }
+
+                const nextNotificationDate = nextDate.toISOString().split("T")[0];
+                const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+
+                const shouldStopAfterThis = repeatability === "monthly" && originalNotification && originalNotification.alreadyRepeated;
+
+                if (shouldStopAfterThis) {
+                    return;
+                }
+
+                const newNotification = {
+                    "title": title.endsWith(" - Completed") ? title.replace(" - Completed", "") : title,
+                    "description": body,
+                    "date": nextNotificationDate,
+                    "time": nextNotificationTime,
+                    repeatability,
+                    "completed": 0,
+                };
+
+                fetch("http://localhost:3001/notifications", {
+                    "method": "POST",
+                    "headers": { "Content-Type": "application/json" },
+                    "body": JSON.stringify(newNotification),
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(`Notification saved successfully: ${JSON.stringify(data)}`);
+                        const nextTimestamp = new Date(`${newNotification.date}T${newNotification.time}`).getTime();
+                        scheduleNotification({
+                            "title": newNotification.title,
+                            "body": newNotification.description || "",
+                            "timestamp": nextTimestamp,
+                            "repeatability": newNotification.repeatability,
+                            "originalNotification": newNotification,
+                        });
+                    })
+                    .catch((error) => {
+                        console.error("Failed to save notification:", error);
+                    });
+            },
+        );
     }
 
     if (delay <= 0) {
