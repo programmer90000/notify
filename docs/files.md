@@ -252,3 +252,69 @@ Standardized error handling:
 - Missing parameters
 - Invalid notification IDs
 
+## backend/logNotifications.js
+
+### Table of Contents
+
+[Overview](#log-notifications-overview)
+
+[Purpose](#log-notifications-purpose)
+
+[Usage](#log-notifications-usage)
+
+[Behavior](#log-notifications-behavior)
+
+[Exit Codes](#log-notifications-exit-codes)
+
+[Warning ⚠️](#log-notifications-warning)
+
+[Example Output](#log-notifications-example-output)
+
+### <a id="log-notifications-overview">Overview</a>
+
+Temporary debugging utility for inspecting notification records in the database.
+
+### <a id="log-notifications-purpose">Purpose</a>
+- Verify proper storage of notifications during development
+- Quickly view all notification records in console
+- Debug database operations
+
+### <a id="log-notifications-usage">Usage</a>
+
+```bash
+node backend/logNotifications.js
+```
+
+### <a id="log-notifications-behavior">Behavior</a>
+
+Connects to SQLite database using `./database` module
+
+Executes `SELECT * FROM notifications` query
+
+Outputs results
+- Success: Displays formatted table via `console.table()`
+- Error: Prints error message to stderr
+
+### <a id="log-notifications-exit-codes">Exit Codes</a>
+
+| Code | Meaning | Description |
+|------|-----------------------|-----------------------------------------------------------------------------|
+| `0`  | Success  | The query executed successfully and results were displayed |
+| `1`  | Database Error | An error occurred while querying the database |
+| `2`  | Connection Error | Failed to establish database connection (if added in future versions) |
+| `255`| Unexpected Error | Unhandled exception occurred (if error handling is expanded) |
+
+### <a id="log-notifications-warning">Warning ⚠️</a>
+Production Note
+
+This file should be removed before release because:
+- Exposes all notification data in clear text
+- Lacks security controls
+- Serves no production purpose
+
+### <a id="log-notifications-example-output">Example Output</a>
+
+| index | id | title | description | date | time | repeatability | completed |
+|-------|-----|-------------|-------------|-------------|------------|---------------|-----------|
+| 0 | 0 | 'Notification 1' | 'This is notification 1' | '2025-06-23'| '16:30' | 'daily' | 1 |
+| 1 | 1 | 'Notification 2' | 'This is notification 2' | '2025-06-24'| '16:30' | 'daily' | 0 |
