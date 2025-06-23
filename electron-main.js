@@ -50,7 +50,51 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
                 }
 
                 if (row.completed === 1) {
-                    console.log("Notification is marked as completed, skipping...");
+                    console.log("Notification is marked as completed, skipping display...");
+                    // Continue with repeating logic even if completed
+                    if (!repeatability) { return; }
+                    
+                    const currentDate = new Date(timestamp);
+                    const nextDate = getNextNotificationDate(currentDate, repeatability);
+                    
+                    if (!nextDate) { return; }
+                    
+                    const nextNotificationDate = nextDate.toISOString().split("T")[0];
+                    const nextNotificationTime = nextDate.toTimeString().split(" ")[0];
+                    
+                    const newNotification = {
+                        "title": title.endsWith(" - Completed") ? title.replace(" - Completed", "") : title,
+                        "description": body,
+                        "date": nextNotificationDate,
+                        "time": nextNotificationTime,
+                        repeatability,
+                        "completed": 0,
+                    };
+                    
+                    fetch("http://localhost:3001/notifications", {
+                        "method": "POST",
+                        "headers": { "Content-Type": "application/json" },
+                        "body": JSON.stringify(newNotification),
+                    })
+                        .then((response) => {
+                            if (!response.ok) { throw new Error(response.statusText); }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log(`Repeated notification saved: ${JSON.stringify(data)}`);
+                            const nextTimestamp = new Date(`${newNotification.date}T${newNotification.time}`).getTime();
+                            scheduleNotification({
+                                "title": newNotification.title,
+                                "body": newNotification.description || "",
+                                "timestamp": nextTimestamp,
+                                "repeatability": newNotification.repeatability,
+                                "originalNotification": newNotification,
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Failed to save repeated notification:", error);
+                        });
+                    
                     return;
                 }
 
