@@ -39,19 +39,22 @@
         "win": {
             "target": {
                 "target": "nsis"
-            }
+            },
+            "icon": "build/app-icon.png"
         },
         "mac": {
             "target": {
                 "target": "dmg"
-            }
+            },
+            "icon": "build/app-icon.png"
         },
         "linux": {
             "target": [
                 "AppImage",
                 "deb",
                 "rpm"
-            ]
+            ],
+            "icon": "build/app-icon.png"
         }
     },
     "workspaces": [
