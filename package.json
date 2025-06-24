@@ -31,6 +31,10 @@
             {
                 "from": "backend",
                 "to": "app/backend"
+            },
+            {
+                "from": "build/icon.png",
+                "to": "icon.png"
             }
         ],
         "directories": {
