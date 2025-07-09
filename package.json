@@ -4,7 +4,10 @@
     "main": "electron-main.js",
     "private": true,
     "description": "",
-    "author": "",
+    "author": {
+        "name": "Your Name",
+        "email": "your@email.com"
+    },
     "license": "",
     "scripts": {
         "postinstall": "electron-builder install-app-deps",
