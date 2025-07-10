@@ -15,8 +15,8 @@ app.listen(3001, () => {
 app.post("/notifications", (req, res) => {
     const { title, description, date, time, repeatability } = req.body;
     db.run(`
-    INSERT INTO notifications (title, description, date, time, repeatability)
-    VALUES (?, ?, ?, ?, ?);
+    INSERT INTO notifications (title, description, date, time, repeatability, displayed)
+    VALUES (?, ?, ?, ?, ?, 0);
   `, [title, description, date, time, repeatability], (err) => {
         if (err) {
             console.error(err);

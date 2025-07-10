@@ -105,6 +105,10 @@ function scheduleNotification({ title, body, timestamp, repeatability, originalN
                 console.log("Showing notification:", title);
                 new Notification({ title, body }).show();
 
+                db.run("UPDATE notifications SET displayed = 1 WHERE id = ?", [row.id], (err) => {
+                    if (err) { console.error("Failed to update displayed status:", err); }
+                });
+
                 // Handle repeatability logic
                 if (!repeatability) { return; }
 

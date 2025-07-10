@@ -20,7 +20,8 @@ db.run(`
       date TEXT,
       time TEXT,
       repeatability TEXT,
-      completed INTEGER DEFAULT 0 -- 0 for incomplete, 1 for complete
+      completed INTEGER DEFAULT 0, -- 0 for incomplete, 1 for complete
+      displayed INTEGER DEFAULT 0 -- 0 for not displayed, 1 for displayed
     );
   `);
 
