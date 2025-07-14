@@ -279,8 +279,8 @@ function createWindow() {
 app.whenReady().then(async () => {
     startBackend(createWindow);
     try {
-        const incompleteRows = await new Promise((resolve, reject) => {
-            db.all("SELECT * FROM notifications WHERE completed = 0", (err, rows) => {
+        const overdueIncompleteRows = await new Promise((resolve, reject) => {
+            db.all("SELECT * FROM notifications WHERE completed = 0 AND strftime('%Y-%m-%d %H:%M:%S', date || ' ' || time) < CURRENT_TIMESTAMP", (err, rows) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -288,8 +288,8 @@ app.whenReady().then(async () => {
                 }
             });
         });
-        console.log("Incomplete notifications:");
-        console.log(JSON.stringify(incompleteRows));
+        console.log("Overdue incomplete notifications:");
+        console.log(JSON.stringify(overdueIncompleteRows));
     } catch (err) {
         console.error(err);
     }
