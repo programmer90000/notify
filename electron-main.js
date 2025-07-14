@@ -285,11 +285,11 @@ app.whenReady().then(async () => {
                     reject(err);
                 } else {
                     resolve(rows);
+                    console.log("Overdue incomplete notifications:");
+                    console.log(JSON.stringify(rows));
                 }
             });
         });
-        console.log("Overdue incomplete notifications:");
-        console.log(JSON.stringify(overdueIncompleteRows));
     } catch (err) {
         console.error(err);
     }
