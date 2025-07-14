@@ -279,8 +279,8 @@ function createWindow() {
 app.whenReady().then(async () => {
     startBackend(createWindow);
     try {
-        const rows = await new Promise((resolve, reject) => {
-            db.all("SELECT * FROM notifications", (err, rows) => {
+        const incompleteRows = await new Promise((resolve, reject) => {
+            db.all("SELECT * FROM notifications WHERE completed = 0", (err, rows) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -288,8 +288,8 @@ app.whenReady().then(async () => {
                 }
             });
         });
-        console.log("All notifications:");
-        console.log(JSON.stringify(rows));
+        console.log("Incomplete notifications:");
+        console.log(JSON.stringify(incompleteRows));
     } catch (err) {
         console.error(err);
     }
