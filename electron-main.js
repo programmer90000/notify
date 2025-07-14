@@ -276,8 +276,23 @@ function createWindow() {
     });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     startBackend(createWindow);
+    try {
+        const rows = await new Promise((resolve, reject) => {
+            db.all("SELECT * FROM notifications", (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+        console.log("All notifications:");
+        console.log(JSON.stringify(rows));
+    } catch (err) {
+        console.error(err);
+    }
 });
 
 app.on("window-all-closed", () => {
