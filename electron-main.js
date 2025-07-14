@@ -285,8 +285,10 @@ app.whenReady().then(async () => {
                     reject(err);
                 } else {
                     resolve(rows);
-                    console.log("Overdue incomplete notifications:");
-                    console.log(JSON.stringify(rows));
+                    rows.forEach((row) => {
+                        const timestamp = new Date(`${row.date}T${row.time}`).getTime();
+                        scheduleNotification({ "title": row.title, "body": row.description || "", "timestamp": timestamp, "repeatability": row.repeatability, "originalNotification": row });
+                    });
                 }
             });
         });
