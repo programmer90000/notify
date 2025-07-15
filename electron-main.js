@@ -285,13 +285,15 @@ app.whenReady().then(() => {
     startBackend(createWindow).then(async () => {
         try {
             const overdueIncompleteRows = await new Promise((resolve, reject) => {
-                db.all("SELECT * FROM notifications WHERE completed = 0 AND strftime('%Y-%m-%d %H:%M:%S', date || ' ' || time) < CURRENT_TIMESTAMP", (err, rows) => {
+                db.all("SELECT * FROM notifications WHERE completed = 0", (err, rows) => {
+                    console.log("Query:", "SELECT * FROM notifications");
+                    console.log("Rows:", JSON.stringify(rows));
                     if (err) {
                         reject(err);
                     } else {
                         resolve(rows);
-                        console.log("Overdue incomplete notifications:");
-                        console.log(JSON.stringify(rows));
+                        // console.log("Overdue incomplete notifications:");
+                        // console.log(JSON.stringify(rows));
                     }
                 });
             });
