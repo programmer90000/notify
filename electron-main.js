@@ -286,8 +286,10 @@ app.whenReady().then(() => {
         try {
             const overdueIncompleteRows = await new Promise((resolve, reject) => {
                 db.all("SELECT * FROM notifications WHERE completed = 0", (err, rows) => {
-                    console.log("Query:", "SELECT * FROM notifications");
                     console.log("Rows:", JSON.stringify(rows));
+                    rows.forEach((row) => {
+                        console.log(`Date: ${row.date}, Time: ${row.time}`);
+                    });
                     if (err) {
                         reject(err);
                     } else {
