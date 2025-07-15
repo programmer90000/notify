@@ -224,34 +224,39 @@ const isDev = !app.isPackaged;
 
 
 function startBackend(callback) {
-    const backendPath = isDev ? path.join(__dirname, "backend", "server.js") : path.join(process.resourcesPath, "app.asar.unpacked", "backend", "server.js");
+    return new Promise((resolve, reject) => {
+        const backendPath = isDev ? path.join(__dirname, "backend", "server.js") : path.join(process.resourcesPath, "app.asar.unpacked", "backend", "server.js");
     
-    console.log("Starting backend from:", backendPath);
+        console.log("Starting backend from:", backendPath);
     
-    backendProcess = spawn("node", [backendPath], {
-        "stdio": ["pipe", "pipe", "pipe"],
-    });
+        backendProcess = spawn("node", [backendPath], {
+            "stdio": ["pipe", "pipe", "pipe"],
+        });
     
-    backendProcess.stdout.on("data", (data) => {
-        const message = data.toString();
-        console.log(`Backend: ${message}`);
+        backendProcess.stdout.on("data", (data) => {
+            const message = data.toString();
+            console.log(`Backend: ${message}`);
 
-        // Wait until backend is listening before creating window
-        if (message.includes("Server listening on port 3001") && callback) {
-            callback();
-        }
-    });
+            // Wait until backend is listening before creating window
+            if (message.includes("Server listening on port 3001") && callback) {
+                callback();
+                resolve();
+            }
+        });
     
-    backendProcess.stderr.on("data", (data) => {
-        console.error(`Backend Error: ${data.toString()}`);
-    });
+        backendProcess.stderr.on("data", (data) => {
+            console.error(`Backend Error: ${data.toString()}`);
+            reject();
+        });
     
-    backendProcess.on("close", (code) => {
-        console.log(`Backend process exited with code ${code}`);
-    });
+        backendProcess.on("close", (code) => {
+            console.log(`Backend process exited with code ${code}`);
+        });
     
-    backendProcess.on("error", (error) => {
-        console.error("Failed to start backend:", error);
+        backendProcess.on("error", (error) => {
+            console.error("Failed to start backend:", error);
+            reject(); // Add this line to reject the promise if an error occurs
+        });
     });
 }
 
@@ -276,25 +281,24 @@ function createWindow() {
     });
 }
 
-app.whenReady().then(async () => {
-    startBackend(createWindow);
-    try {
-        const overdueIncompleteRows = await new Promise((resolve, reject) => {
-            db.all("SELECT * FROM notifications WHERE completed = 0 AND strftime('%Y-%m-%d %H:%M:%S', date || ' ' || time) < CURRENT_TIMESTAMP", (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(rows);
-                    rows.forEach((row) => {
-                        const timestamp = new Date(`${row.date}T${row.time}`).getTime();
-                        scheduleNotification({ "title": row.title, "body": row.description || "", "timestamp": timestamp, "repeatability": row.repeatability, "originalNotification": row });
-                    });
-                }
+app.whenReady().then(() => {
+    startBackend(createWindow).then(async () => {
+        try {
+            const overdueIncompleteRows = await new Promise((resolve, reject) => {
+                db.all("SELECT * FROM notifications WHERE completed = 0 AND strftime('%Y-%m-%d %H:%M:%S', date || ' ' || time) < CURRENT_TIMESTAMP", (err, rows) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(rows);
+                        console.log("Overdue incomplete notifications:");
+                        console.log(JSON.stringify(rows));
+                    }
+                });
             });
-        });
-    } catch (err) {
-        console.error(err);
-    }
+        } catch (err) {
+            console.error(err);
+        }
+    });
 });
 
 app.on("window-all-closed", () => {
