@@ -6,7 +6,7 @@
     "scripts": {
         "start": "concurrently -k \"npm:serve\" \"npm:electron\"",
         "serve": "webpack serve",
-        "electron": "wait-on http://localhost:3000 && electron .",
+        "electron": "wait-on http://localhost:3000 && electron ../electron-main.js",
         "build": "webpack --mode production"
     },
     "author": "",
