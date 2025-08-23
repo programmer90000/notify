@@ -56,7 +56,10 @@
             "icon": "build/app-icon.png"
         },
         "linux": {
-            "target": [ "AppImage", "deb" ],
+            "target": [
+                "AppImage",
+                "deb"
+            ],
             "icon": "build/app-icon.png"
         }
     },
