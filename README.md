@@ -17,3 +17,5 @@ npm run dist
 Open the `dist/notify_1.0.0_amd64.deb` file
 
 Install it from the Discover app
+
+The Notify app can now be found in `/opt/Notify/`
