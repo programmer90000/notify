@@ -30,16 +30,6 @@
         "asarUnpack": [
             "backend/**/*"
         ],
-        "extraResources": [
-            {
-                "from": "backend",
-                "to": "app/backend"
-            },
-            {
-                "from": "build/app-icon.png",
-                "to": "icon.png"
-            }
-        ],
         "directories": {
             "buildResources": "build"
         },

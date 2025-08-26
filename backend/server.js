@@ -6,11 +6,6 @@ const db = require("./database");
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 
-// Start the server
-app.listen(3001, () => {
-    console.log("Server listening on port 3001");
-});
-
 // Create new notifications
 app.post("/notifications", (req, res) => {
     const { title, description, date, time, repeatability } = req.body;
@@ -88,3 +83,5 @@ app.put("/notifications/:id/complete", (req, res) => {
         },
     );
 });
+
+module.exports = app;

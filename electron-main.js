@@ -1,5 +1,5 @@
-const { app, BrowserWindow, ipcMain, Notification } = require("electron");
-const { spawn } = require("child_process");
+const { app, BrowserWindow, ipcMain, Notification, dialog } = require("electron");
+const backendApp = require("./backend/server.js");
 const path = require("path");
 const fs = require("fs");
 const db = require("./backend/database.js");
@@ -11,7 +11,7 @@ console.log = (...args) => { return logStream.write(`${args.join(" ")}\n`); };
 console.error = (...args) => { return logStream.write(`[ERR] ${args.join(" ")}\n`); };
 
 let mainWindow;
-let backendProcess;
+let backendServer;
 let scheduledNotifications = [];
 
 function getNextNotificationDate(currentDate, repeatability) {
@@ -223,39 +223,16 @@ Completed: ${notification.completed}
 const isDev = !app.isPackaged;
 
 
-function startBackend(callback) {
+function startBackend() {
     return new Promise((resolve, reject) => {
-        const backendPath = isDev ? path.join(__dirname, "backend", "server.js") : path.join(process.resourcesPath, "app.asar.unpacked", "backend", "server.js");
-    
-        console.log("Starting backend from:", backendPath);
-    
-        backendProcess = spawn("node", [backendPath], {
-            "stdio": ["pipe", "pipe", "pipe"],
+        console.log("Starting backend server...");
+        const server = backendApp.listen(3001, () => {
+            console.log("Backend server listening on port 3001");
+            resolve(server);
         });
-    
-        backendProcess.stdout.on("data", (data) => {
-            const message = data.toString();
-            console.log(`Backend: ${message}`);
-
-            // Wait until backend is listening before creating window
-            if (message.includes("Server listening on port 3001") && callback) {
-                callback();
-                resolve();
-            }
-        });
-    
-        backendProcess.stderr.on("data", (data) => {
-            console.error(`Backend Error: ${data.toString()}`);
-            reject();
-        });
-    
-        backendProcess.on("close", (code) => {
-            console.log(`Backend process exited with code ${code}`);
-        });
-    
-        backendProcess.on("error", (error) => {
-            console.error("Failed to start backend:", error);
-            reject(); // Add this line to reject the promise if an error occurs
+        server.on("error", (err) => {
+            console.error("Backend server error:", err);
+            reject(err);
         });
     });
 }
@@ -282,27 +259,52 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    startBackend(createWindow).then(async () => {
-        try {
-            const overdueIncompleteRows = await new Promise((resolve, reject) => {
-                db.all("SELECT * FROM notifications WHERE completed = 0", (err, rows) => {
-                    console.log("Rows:", JSON.stringify(rows));
-                    rows.forEach((row) => {
-                        console.log(`Date: ${row.date}, Time: ${row.time}`);
+    startBackend()
+        .then((server) => {
+            backendServer = server;
+            createWindow();
+
+            // Reschedule all existing notifications on startup
+            db.all("SELECT * FROM notifications", (err, rows) => {
+                if (err) {
+                    console.error("Error fetching notifications on startup:", err);
+                    return;
+                }
+                rows.forEach((row) => {
+                    console.log(`Scheduling existing notification: ${row.title}`);
+                    const timestamp = new Date(`${row.date}T${row.time}`).getTime();
+                    scheduleNotification({
+                        "title": row.title,
+                        "body": row.description || "",
+                        timestamp,
+                        "repeatability": row.repeatability,
+                        "originalNotification": row,
                     });
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(rows);
-                        // console.log("Overdue incomplete notifications:");
-                        // console.log(JSON.stringify(rows));
-                    }
                 });
             });
-        } catch (err) {
-            console.error(err);
-        }
-    });
+        })
+        .catch((err) => {
+            console.error("Failed to start backend, quitting app.", err);
+            dialog.showErrorBox("Application Error", `Failed to start the backend server:\n\n${err.message}\n\nThe application will now close.`);
+            app.quit();
+        });
+});
+
+app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") {
+        app.quit();
+    }
+});
+
+app.on("before-quit", () => {
+    if (backendServer) {
+        console.log("Closing backend server...");
+        backendServer.close();
+    }
+});
+
+app.setLoginItemSettings({
+    "openAtLogin": true,
 });
 
 app.on("window-all-closed", () => {
