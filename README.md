@@ -1,7 +1,19 @@
 # How to run the app
 
-Run
+Run:
 ```
 npm install
 npm start
 ```
+
+# How to install the app on Debian based systems using the KDE Plasma Desktop Environment
+
+Run:
+```
+npm install
+npm run dist
+```
+
+Open the `dist/notify_1.0.0_amd64.deb` file
+
+Install it from the Discover app
