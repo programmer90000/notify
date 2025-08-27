@@ -14,7 +14,7 @@ npm install
 npm run dist
 ```
 
-Open the `dist/notify_1.0.0_amd64.deb` file
+Open the `dist/notify_1.0.0_amd64.deb` file from the Dolphin app
 
 Install it from the Discover app
 
