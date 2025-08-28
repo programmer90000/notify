@@ -24,6 +24,7 @@
             "electron-main.js",
             "frontend/dist/**/*",
             "backend/**/*",
+            "build/**/*",
             "node_modules/**/*",
             "package.json"
         ],
@@ -34,16 +35,12 @@
             "buildResources": "build"
         },
         "win": {
-            "target": {
-                "target": "nsis"
-            },
-            "icon": "build/app-icon.png"
+            "target": "nsis",
+            "icon": "build/app-icon.ico"
         },
         "mac": {
-            "target": {
-                "target": "dmg"
-            },
-            "icon": "build/app-icon.png"
+            "target": "dmg",
+            "icon": "build/app-icon.icns"
         },
         "linux": {
             "target": [
